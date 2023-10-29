@@ -9,7 +9,6 @@ pub use ed25519_dalek::{
     EXPANDED_SECRET_KEY_LENGTH as PRIVATE_KEY_SIZE, PUBLIC_KEY_LENGTH as PUBLIC_KEY_SIZE,
     SIGNATURE_LENGTH as SIGNATURE_SIZE,
 };
-use crate::keys::{PrivateKey, PublicKey};
 use rand::rngs::OsRng;
 use rand::SeedableRng;
 use rand_chacha::ChaChaRng;
