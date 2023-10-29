@@ -1,6 +1,7 @@
 pub const ALGORITHM_NAME: &str = "ED25519_SHA2_512";
 
 use super::{KeyGenOption, SignatureScheme};
+use crate::keys::{PrivateKey, PublicKey};
 #[cfg(any(feature = "x25519", feature = "x25519_asm"))]
 use ed25519_dalek::SecretKey as SK;
 use ed25519_dalek::{Keypair, PublicKey as PK, Signature, Signer, Verifier};
@@ -45,9 +46,9 @@ impl Ed25519Sha512 {
         let cey = CompressedEdwardsY::from_slice(&pk[..]);
         match cey.decompress() {
             Some(ep) => Ok(PublicKey(ep.to_montgomery().as_bytes().to_vec())),
-            None => Err(CryptoError::ParseError(format!(
-                "Invalid public key provided. Cannot convert to key exchange key"
-            ))),
+            None => Err(CryptoError::ParseError(
+                "Invalid public key provided. Cannot convert to key exchange key".to_string(),
+            )),
         }
     }
 
@@ -67,9 +68,9 @@ impl Ed25519Sha512 {
     pub fn sign_key_to_key_exchange(sk: &PrivateKey) -> Result<PrivateKey, CryptoError> {
         // Length is normally 64 but we only need the secret from the first half
         if sk.len() < 32 {
-            return Err(CryptoError::ParseError(format!(
-                "Invalid private key provided"
-            )));
+            return Err(CryptoError::ParseError(
+                "Invalid private key provided".to_string(),
+            ));
         }
         // hash secret
         let hash = sha2::Sha512::digest(&sk[..32]);
@@ -93,9 +94,9 @@ impl Ed25519Sha512 {
     /// ```
     pub fn expand_keypair(ikm: &[u8]) -> Result<(PublicKey, PrivateKey), CryptoError> {
         if ikm.len() < 32 {
-            return Err(CryptoError::ParseError(format!(
-                "Invalid key material provided"
-            )));
+            return Err(CryptoError::ParseError(
+                "Invalid key material provided".to_string(),
+            ));
         }
         let mut private = vec![0u8; 64];
         private[..32].copy_from_slice(&ikm[..32]);
@@ -215,18 +216,6 @@ mod test {
         let result = scheme.verify(&MESSAGE_1, hex::decode(SIGNATURE_1).unwrap().as_slice(), &p);
         assert!(result.is_ok());
         assert!(result.unwrap());
-
-        //Check if signatures produced here can be verified by libsodium
-        let signature = hex::decode(SIGNATURE_1).unwrap();
-        let res = unsafe {
-            ffi::crypto_sign_ed25519_verify_detached(
-                signature.as_slice().as_ptr() as *const u8,
-                MESSAGE_1.as_ptr() as *const u8,
-                MESSAGE_1.len() as u64,
-                p.as_ptr() as *const u8,
-            )
-        };
-        assert_eq!(res, 0);
     }
 
     #[test]
@@ -245,22 +234,6 @@ mod test {
 
                 assert_eq!(sig.len(), SIGNATURE_SIZE);
                 assert_eq!(hex::encode(sig.as_slice()), SIGNATURE_1);
-
-                //Check if libsodium signs the message and this module still can verify it
-                //And that private keys can sign with other libraries
-                let mut signature = [0u8; ffi::crypto_sign_ed25519_BYTES as usize];
-                unsafe {
-                    ffi::crypto_sign_ed25519_detached(
-                        signature.as_mut_ptr() as *mut u8,
-                        0u64 as *mut u64,
-                        MESSAGE_1.as_ptr() as *const u8,
-                        MESSAGE_1.len() as u64,
-                        s.as_ptr() as *const u8,
-                    )
-                };
-                let result = scheme.verify(&MESSAGE_1, &signature, &p);
-                assert!(result.is_ok());
-                assert!(result.unwrap());
             }
             Err(e) => assert!(false, "{}", e),
         }

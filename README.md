@@ -1,8 +1,14 @@
 # HYPERLEDGER URSA
 
-[![Ursa CI](https://github.com/hyperledger/ursa/workflows/Ursa%20CI/badge.svg)](https://github.com/hyperledger/ursa/actions?query=workflow%3A%22Ursa+CI%22)
-[![Build status](https://ci.appveyor.com/api/projects/status/1htmp82mdvmfjjap?svg=true)](https://ci.appveyor.com/project/hyperledger/ursa)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2447/badge)](https://bestpractices.coreinfrastructure.org/projects/2447)
+[Hyperledger Ursa was moved to EOL at the TOC meeting on 27 APR 2023.](https://toc.hyperledger.org/meeting-minutes/2023/2023-04-27-TOC-meeting-record.html)
+
+The components of Ursa that are still in active use are moved to their respective projects where they will continue to be maintained, including:
+
+- CL Signatures to AnonCreds
+- BBS+ Signatures to Aries
+- BLS Signatures to Indy
+
+The published Ursa crates remain available for those projects already using them.
 
 - [Introduction](#introduction)
 - [Features](#features)
@@ -89,7 +95,6 @@ found in Libursa.
 Ursa uses the following external dependencies:
 
 - [openssl 1.1.0j or greater](https://www.openssl.org/source/openssl-1.1.0j.tar.gz) (Written in C)
-- [libsodium 1.0.18 or greater](https://github.com/jedisct1/libsodium/archive/1.0.18.tar.gz) (Written in C)
 - [libsecp256k1](https://github.com/bitcoin-core/secp256k1) (Written in C)
 
 These dependencies are used when building in the default secure mode. These
@@ -104,9 +109,7 @@ when using portable mode for their applications.
 
 # Building from Source
 
-Libursa and Libzmix rely on libsodium for the default
-secure mode. Please see the following document for specific platform
-installations [here](docs/build-environment.md).
+Please see the following document for platform-specific installations [here](docs/build-environment.md).
 
 ## Libursa
 

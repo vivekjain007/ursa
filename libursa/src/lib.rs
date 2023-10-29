@@ -25,8 +25,6 @@ extern crate block_modes;
 extern crate block_padding;
 #[cfg(feature = "hmac")]
 extern crate hmac;
-#[cfg(any(test, feature = "libsodium-ffi"))]
-extern crate libsodium_ffi;
 #[cfg(any(test, feature = "openssl"))]
 extern crate openssl;
 #[cfg(feature = "rand")]
@@ -90,15 +88,6 @@ extern crate k256;
 #[cfg(feature = "serde")]
 extern crate serde;
 #[cfg(any(test, feature = "ffi"))]
-#[cfg_attr(
-    any(
-        feature = "cl",
-        feature = "cl_native",
-        feature = "ffi",
-        feature = "wasm"
-    ),
-    macro_use
-)]
 extern crate serde_json;
 #[cfg(feature = "ffi")]
 #[macro_use]
@@ -140,12 +129,14 @@ pub mod utils;
 
 #[cfg(any(feature = "bls_bn254", feature = "bls_bn254_asm"))]
 pub mod bls;
-#[cfg(any(feature = "cl_native", feature = "sharing_native"))]
-#[path = "bn/openssl.rs"]
+
+#[cfg_attr(
+    any(feature = "cl_native", feature = "sharing_native"),
+    path = "bn/openssl.rs"
+)]
+#[cfg_attr(any(feature = "cl", feature = "sharing"), path = "bn/rust.rs")]
 pub mod bn;
-#[cfg(any(feature = "cl", feature = "sharing"))]
-#[path = "bn/rust.rs"]
-pub mod bn;
+
 #[cfg(any(feature = "cl", feature = "cl_native"))]
 pub mod cl;
 #[cfg(any(
@@ -219,6 +210,10 @@ pub mod signatures;
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
+#[cfg(feature = "chacha20poly1305_native")]
+#[warn(dead_code)]
+const REMOVED: &str = "Support for libsodium as a backend has been removed. The chacha20poly1305_native feature is currently equivalent to chacha20poly1305, and deprecated.";
+
 pub type CryptoResult<T> = Result<T, CryptoError>;
 
 #[derive(Debug)]
@@ -254,32 +249,23 @@ impl std::fmt::Display for CryptoError {
 #[cfg(feature = "bitcoinsecp256k1")]
 impl From<bitcoinsecp256k1::Error> for CryptoError {
     fn from(error: bitcoinsecp256k1::Error) -> CryptoError {
-        match error {
-            bitcoinsecp256k1::Error::IncorrectSignature => {
-                CryptoError::ParseError("Incorrect Signature".to_string())
+        use bitcoinsecp256k1::Error::*;
+        CryptoError::ParseError(
+            match error {
+                IncorrectSignature => "Incorrect signature",
+                InvalidMessage => "Invalid message",
+                InvalidPublicKey => "Invalid public key",
+                InvalidPublicKeySum => "Invalid public key sum",
+                InvalidSignature => "Invalid signature",
+                InvalidSharedSecret => "Invalid shared secret",
+                InvalidSecretKey => "Invalid secret key",
+                InvalidRecoveryId => "Invalid recovery id",
+                InvalidTweak => "Invalid tweak",
+                NotEnoughMemory => "Not enough memory",
+                InvalidParityValue(_) => "Invalid parity", // Value is opaque, cannot print
             }
-            bitcoinsecp256k1::Error::InvalidMessage => {
-                CryptoError::ParseError("Invalid Message".to_string())
-            }
-            bitcoinsecp256k1::Error::InvalidPublicKey => {
-                CryptoError::ParseError("Invalid Public Key".to_string())
-            }
-            bitcoinsecp256k1::Error::InvalidSignature => {
-                CryptoError::ParseError("Invalid Signature".to_string())
-            }
-            bitcoinsecp256k1::Error::InvalidSecretKey => {
-                CryptoError::ParseError("Invalid Secret Key".to_string())
-            }
-            bitcoinsecp256k1::Error::InvalidRecoveryId => {
-                CryptoError::ParseError("Invalid Recovery Id".to_string())
-            }
-            bitcoinsecp256k1::Error::InvalidTweak => {
-                CryptoError::ParseError("Invalid Tweak".to_string())
-            }
-            bitcoinsecp256k1::Error::NotEnoughMemory => {
-                CryptoError::ParseError("Not Enough Memory".to_string())
-            }
-        }
+            .to_owned(),
+        )
     }
 }
 
@@ -297,7 +283,6 @@ impl From<bitcoinsecp256k1::Error> for CryptoError {
 ))]
 impl From<errors::UrsaCryptoError> for CryptoError {
     fn from(err: errors::UrsaCryptoError) -> Self {
-        let kind = err.kind();
-        CryptoError::GeneralError(format!("{}", kind))
+        CryptoError::GeneralError(format!("{}", err.kind()))
     }
 }

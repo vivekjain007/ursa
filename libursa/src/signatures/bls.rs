@@ -1,4 +1,5 @@
 use super::SignatureScheme;
+use crate::keys::{KeyGenOption, PrivateKey as UrsaPrivateKey, PublicKey as UrsaPublicKey};
 /// Implements
 /// https://eprint.iacr.org/2018/483 and
 /// https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html

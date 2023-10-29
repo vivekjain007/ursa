@@ -1,7 +1,7 @@
 [package]
 authors = ["The Hyperledger Ursa Contributors"]
 description = "A collection of cryptography primitives for implementing blockchain transactions and secure communication"
-documentation = "https://doc.rs/ursa"
+documentation = "https://docs.rs/ursa"
 edition = "2018"
 homepage = "https://crates.io/crates/ursa"
 keywords = ["cryptography", "zero-knowledge"]
@@ -12,7 +12,7 @@ repository = "https://github.com/hyperledger/ursa"
 version = "0.5.0"
 
 [badges]
-maintenance = { status = "actively-developed" }
+maintenance = { status = "deprecated" }
 
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]

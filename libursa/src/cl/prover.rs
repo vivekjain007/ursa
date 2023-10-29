@@ -97,7 +97,7 @@ impl Prover {
         let blinded_primary_credential_secrets =
             Prover::_generate_blinded_primary_credential_secrets_factors(
                 &credential_pub_key.p_key,
-                &credential_values,
+                credential_values,
             )?;
 
         let blinded_revocation_credential_secrets = match credential_pub_key.r_key {
@@ -111,8 +111,8 @@ impl Prover {
             Prover::_new_blinded_credential_secrets_correctness_proof(
                 &credential_pub_key.p_key,
                 &blinded_primary_credential_secrets,
-                &credential_nonce,
-                &credential_values,
+                credential_nonce,
+                credential_values,
             )?;
 
         let blinded_credential_secrets = BlindedCredentialSecrets {
@@ -252,9 +252,9 @@ impl Prover {
             &mut Some(ref mut non_revocation_cred),
             Some(ref vr_prime),
             &Some(ref r_key),
-            Some(ref r_key_pub),
-            Some(ref r_reg),
-            Some(ref witness),
+            Some(r_key_pub),
+            Some(r_reg),
+            Some(witness),
         ) = (
             &mut credential_signature.r_credential,
             credential_secrets_blinding_factors.vr_prime,
@@ -266,7 +266,7 @@ impl Prover {
             Prover::_process_non_revocation_credential(
                 non_revocation_cred,
                 vr_prime,
-                &r_key,
+                r_key,
                 r_key_pub,
                 r_reg,
                 witness,
@@ -364,7 +364,7 @@ impl Prover {
                 &r_inverse,
                 &key_correctness_proof.c,
                 &pr_pub_key.s,
-                &xr_cap_value,
+                xr_cap_value,
                 &pr_pub_key.n,
                 &mut ctx,
             )?;
@@ -450,9 +450,9 @@ impl Prover {
                     attr.clone(),
                     get_pedersen_commitment(
                         &p_pub_key.s,
-                        &blinding_factor,
+                        blinding_factor,
                         &p_pub_key.z,
-                        &value,
+                        value,
                         &p_pub_key.n,
                         &mut ctx,
                     )?,
@@ -652,7 +652,7 @@ impl Prover {
         let r_cnxt_m2 = BigNumber::from_bytes(&r_cred.m2.to_bytes()?)?;
         r_cred.vr_prime_prime = vr_prime.add_mod(&r_cred.vr_prime_prime)?;
         Prover::_test_witness_signature(
-            &r_cred,
+            r_cred,
             cred_rev_pub_key,
             rev_key_pub,
             rev_reg,
@@ -969,14 +969,14 @@ impl ProofBuilder {
         let mut non_revoc_init_proof = None;
         let mut m2_tilde: Option<BigNumber> = None;
 
-        if let (&Some(ref r_cred), &Some(ref r_reg), &Some(ref r_pub_key), &Some(ref witness)) = (
+        if let (&Some(ref r_cred), &Some(r_reg), &Some(ref r_pub_key), &Some(witness)) = (
             &credential_signature.r_credential,
             &rev_reg,
             &credential_pub_key.r_key,
             &witness,
         ) {
             let proof =
-                ProofBuilder::_init_non_revocation_proof(&r_cred, &r_reg, &r_pub_key, &witness)?;
+                ProofBuilder::_init_non_revocation_proof(r_cred, r_reg, r_pub_key, witness)?;
 
             self.c_list.extend_from_slice(&proof.as_c_list()?);
             self.tau_list.extend_from_slice(&proof.as_tau_list()?);
@@ -1106,7 +1106,7 @@ impl ProofBuilder {
             let mut non_revoc_proof: Option<NonRevocProof> = None;
             if let Some(ref non_revoc_init_proof) = init_proof.non_revoc_init_proof {
                 non_revoc_proof = Some(ProofBuilder::_finalize_non_revocation_proof(
-                    &non_revoc_init_proof,
+                    non_revoc_init_proof,
                     &challenge,
                 )?);
             }
@@ -1253,7 +1253,7 @@ impl ProofBuilder {
         let mut ne_proofs: Vec<PrimaryPredicateInequalityInitProof> = Vec::new();
         for predicate in sub_proof_request.predicates.iter() {
             let ne_proof = ProofBuilder::_init_ne_proof(
-                &issuer_pub_key,
+                issuer_pub_key,
                 &eq_proof.m_tilde,
                 cred_values,
                 predicate,
@@ -1283,17 +1283,13 @@ impl ProofBuilder {
         trace!("ProofBuilder::_init_non_revocation_proof: >>> r_cred: {:?}, rev_reg: {:?}, cred_rev_pub_key: {:?}, witness: {:?}",
                r_cred, rev_reg, cred_rev_pub_key, witness);
 
-        let c_list_params = ProofBuilder::_gen_c_list_params(&r_cred)?;
-        let c_list = ProofBuilder::_create_c_list_values(
-            &r_cred,
-            &c_list_params,
-            &cred_rev_pub_key,
-            witness,
-        )?;
+        let c_list_params = ProofBuilder::_gen_c_list_params(r_cred)?;
+        let c_list =
+            ProofBuilder::_create_c_list_values(r_cred, &c_list_params, cred_rev_pub_key, witness)?;
 
         let tau_list_params = ProofBuilder::_gen_tau_list_params()?;
         let tau_list =
-            create_tau_list_values(&cred_rev_pub_key, &rev_reg, &tau_list_params, &c_list)?;
+            create_tau_list_values(cred_rev_pub_key, rev_reg, &tau_list_params, &c_list)?;
 
         let r_init_proof = NonRevocInitProof {
             c_list_params,
@@ -1351,7 +1347,7 @@ impl ProofBuilder {
             .cloned()
             .collect::<HashSet<String>>();
 
-        let mut m_tilde = clone_bignum_map(&common_attributes)?;
+        let mut m_tilde = clone_bignum_map(common_attributes)?;
         get_mtilde(&unrevealed_attrs, &mut m_tilde)?;
 
         let a_prime = cred_pub_key
@@ -1364,7 +1360,7 @@ impl ProofBuilder {
         let v_prime = c1.v.sub(&c1.e.mul(&r, Some(&mut ctx))?)?;
 
         let t = calc_teq(
-            &cred_pub_key,
+            cred_pub_key,
             &a_prime,
             &e_tilde,
             &v_tilde,
@@ -1452,7 +1448,7 @@ impl ProofBuilder {
             let cur_r = bn_rand(LARGE_VPRIME)?;
             let cut_t = get_pedersen_commitment(
                 &p_pub_key.z,
-                &cur_u,
+                cur_u,
                 &p_pub_key.s,
                 &cur_r,
                 &p_pub_key.n,
@@ -1501,10 +1497,10 @@ impl ProofBuilder {
         })?;
 
         let tau_list = calc_tne(
-            &p_pub_key,
+            p_pub_key,
             &u_tilde,
             &r_tilde,
-            &mj,
+            mj,
             &alpha_tilde,
             &t,
             predicate.is_less(),
@@ -1586,8 +1582,8 @@ impl ProofBuilder {
 
             // val = cur_mtilde + (cur_val * challenge)
             let val = challenge
-                .mul(&cur_val.value(), Some(&mut ctx))?
-                .add(&cur_mtilde)?;
+                .mul(cur_val.value(), Some(&mut ctx))?
+                .add(cur_mtilde)?;
 
             m_hat.insert(k.clone(), val);
         }
@@ -1655,26 +1651,26 @@ impl ProofBuilder {
             let cur_rtilde = &init_proof.r_tilde[&i.to_string()];
             let cur_r = &init_proof.r[&i.to_string()];
 
-            let new_u: BigNumber = c_h.mul(&cur_u, Some(&mut ctx))?.add(&cur_utilde)?;
-            let new_r: BigNumber = c_h.mul(&cur_r, Some(&mut ctx))?.add(&cur_rtilde)?;
+            let new_u: BigNumber = c_h.mul(cur_u, Some(&mut ctx))?.add(cur_utilde)?;
+            let new_r: BigNumber = c_h.mul(cur_r, Some(&mut ctx))?.add(cur_rtilde)?;
 
             u.insert(i.to_string(), new_u);
             r.insert(i.to_string(), new_r);
 
-            urproduct = cur_u.mul(&cur_r, Some(&mut ctx))?.add(&urproduct)?;
+            urproduct = cur_u.mul(cur_r, Some(&mut ctx))?.add(&urproduct)?;
 
             let cur_rtilde_delta = &init_proof.r_tilde["DELTA"];
 
             let new_delta = c_h
                 .mul(&init_proof.r["DELTA"], Some(&mut ctx))?
-                .add(&cur_rtilde_delta)?;
+                .add(cur_rtilde_delta)?;
 
             r.insert("DELTA".to_string(), new_delta);
         }
 
         let alpha = init_proof.r["DELTA"]
             .sub(&urproduct)?
-            .mul(&c_h, Some(&mut ctx))?
+            .mul(c_h, Some(&mut ctx))?
             .add(&init_proof.alpha_tilde)?;
 
         let primary_predicate_ne_proof = PrimaryPredicateInequalityProof {
@@ -1877,7 +1873,7 @@ impl ProofBuilder {
             c_h
         );
 
-        let ch_num_z = bignum_to_group_element(&c_h)?;
+        let ch_num_z = bignum_to_group_element(c_h)?;
         let mut x_list: Vec<GroupOrderElement> = Vec::new();
 
         for (x, y) in init_proof
@@ -1886,7 +1882,7 @@ impl ProofBuilder {
             .iter()
             .zip(init_proof.c_list_params.as_list()?.iter())
         {
-            x_list.push(x.add_mod(&ch_num_z.mul_mod(&y)?.mod_neg()?)?);
+            x_list.push(x.add_mod(&ch_num_z.mul_mod(y)?.mod_neg()?)?);
         }
 
         let non_revoc_proof = NonRevocProof {
@@ -1909,6 +1905,7 @@ mod tests {
     use crate::cl::issuer;
     use serde_json;
 
+    #[cfg(feature = "serde")]
     #[test]
     fn key_correctness_proof_validation_works_for_deserialized_output_v0_4_1_crypto() {
         let kcp = r#"{"c":"37611675737093606611354469283892411880852495117565168932358663398963131397507","xz_cap":"81579130320284221659747319740108875652446580605626929564515869699158446225972801134098632494713496313081314380866687966418290227597750899002882970519534702423347828404017509366494708523530025686292969865053261834885716665417122559158656847219251019258307743208838075692695164262680850087806525721184647037789559371016575764323904037635266872661253754958239070844593676990703001641163014837607074604574439994741936613409912802229927895424755757352646030336597690950842465911939873272966620342405909930599727835739699655473154455657878429132861698360924836632047016333549106122684361100949241413364697739541658923119788014990949301155631757300624437448380216292364426202602100074188682993006187","xr_cap":[["sex","800280099800023684394221657855578281425593426428797438278634535803826854973287741112297002561462044581730457464290768546940348121889048006353304776646794823653560200707175243576534399257694825778643847023451169693956070462522652667711052051119060371846591706152099200381794609252833996514839617453462295422079364560725012355479350713908774407072059863925714626035129287654437915380442859411132043551952897474887960834654566958110046975477442837252851593858380406893298039998278146813948374557719947480415431505168848477644721410506100843223565186964968463081686726318431810101100839476456665117568759117498622946466335362502138675885007428245786030655866656241152568981953362753866546347245506"],["age","588088631461299425903748636894451597454180996508770107860820879608066278697726969676142820725979998876687628461524297952569445512912113947952863000770341397107329530774939533674792868680827566279577518607195225037390604727483704420911912238224219864823492245908348105557153285313698657725038609899106209002384198903035975551652419617009072704552236735717389754124395458798446740853188430442908535423980999434501037185906780341482928855355637070027953698599569975766436241558834373873737728336703980967063844033141464829186289408341005936078717542471679931243178369744750036706021440802187762189222523038598747576436835546143611288733061739572462869076736405341538116562816483588163276630145588"],["height","553220455491285418654889779078476533199565266037716057819253262456706086296310865820014979289644399892322745082334493480377902246036427120996737141182672228618720768916010742192428961333242647461723166430891725984061962166185290028781330840468287369467210902803713581463138002887245708126181113498506095878475477562185158200076760989353034954621747102865883089591566895303014875251551529870810800964290188402770835695975293408858132429212162793578010820152709965777440582153499339685425754384078776656170709303540365276228433474426237479107459583876421876578975913079855215398240111839997147164550277110095530104844265258104360762567118292063538492192083952712713837994596074547775217382719579"],["name","383325619072931698489524170594499308335325217367787209202882000237923187775119979058633557703022426956865524033530017842216102964924733310029537256438963746099184641563671420576298749176202668215626084998168583932862834827081323228031589641597768136343232183260789201414439414019145929237988915293970815065021922162304853953719973584719975042952713084160885042865916208477614187377876264496125987756268019899327470534991407455234648438185065303663808513544394761315253646500213994569448735987674657147571753166712102581100080484612181607406695322516789021386859985149430517261727189786324895636842320235453633433344220062995558348664785301570376489352431483740437508437906549673849465012384545"]]}"#;
@@ -1919,6 +1916,7 @@ mod tests {
         Prover::check_credential_key_correctness_proof(&pubk, &kcp).unwrap();
     }
 
+    #[cfg(feature = "serde")]
     #[test]
     fn key_correctness_proof_validation_works_for_key_correctness_proof_has_extra_keys() {
         let kcp = json!({
@@ -2211,8 +2209,6 @@ mod tests {
         assert_eq!(mocks::primary_proof(), proof);
     }
 
-    extern crate time;
-
     /*
     Results:
 
@@ -2246,25 +2242,23 @@ mod tests {
         println!("Update Proof test -> start");
         let n = 100;
 
-        let total_start_time = time::get_time();
+        let total_start_time = Instant::now();
 
         let cred_schema = issuer::mocks::credential_schema();
         let non_cred_schema = issuer::mocks::non_credential_schema();
         let (cred_pub_key, cred_priv_key, cred_key_correctness_proof) =
             issuer::Issuer::new_credential_def(&cred_schema, &non_cred_schema, true).unwrap();
 
-        let start_time = time::get_time();
+        let start_time = Instant::now();
 
         let (rev_key_pub, rev_key_priv, mut rev_reg, mut rev_tails_generator) =
             issuer::Issuer::new_revocation_registry_def(&cred_pub_key, n, false).unwrap();
 
         let simple_tail_accessor = SimpleTailsAccessor::new(&mut rev_tails_generator).unwrap();
 
-        let end_time = time::get_time();
-
         println!(
             "Create RevocationRegistry Time: {:?}",
-            end_time - start_time
+            Instant::now() - start_time
         );
 
         let cred_values = issuer::mocks::credential_values();
@@ -2338,24 +2332,21 @@ mod tests {
 
         // Update NonRevoc Credential
 
-        let start_time = time::get_time();
+        let start_time = Instant::now();
 
         witness
             .update(rev_idx, n, &rev_reg_delta, &simple_tail_accessor)
             .unwrap();
 
-        let end_time = time::get_time();
-
         println!(
             "Update NonRevocation Credential Time: {:?}",
-            end_time - start_time
+            Instant::now() - start_time
         );
 
-        let total_end_time = time::get_time();
         println!(
             "Total Time for {} credentials: {:?}",
             n,
-            total_end_time - total_start_time
+            Instant::now() - total_start_time
         );
 
         println!("Update Proof test -> end");
