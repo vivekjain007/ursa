@@ -21,9 +21,9 @@ fn eval_benchmark(c: &mut Criterion) {
             b.iter(|| p1.eval(&x))
         });
 
-        c.bench_function(format!("eval_alt for {} elements", n).as_str(), |b| {
-            b.iter(|| p1.eval_alt(&x))
-        });
+        // c.bench_function(format!("eval_alt for {} elements", n).as_str(), |b| {
+        //     b.iter(|| p1.eval_alt(&x))
+        // });
     }
 }
 

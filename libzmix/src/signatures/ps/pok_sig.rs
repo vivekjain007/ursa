@@ -7,7 +7,7 @@ use super::{ate_2_pairing, OtherGroup, OtherGroupVec};
 use crate::commitments::pok_vc::{PoKVCError, PoKVCErrorKind};
 use amcl_wrapper::field_elem::{FieldElement, FieldElementVector};
 use amcl_wrapper::group_elem::{GroupElement, GroupElementVector};
-use signatures::ps::{keys::Params, SIGNATURE_GROUP_SIZE};
+use crate::signatures::ps::{keys::Params, SIGNATURE_GROUP_SIZE};
 use std::collections::{HashMap, HashSet};
 
 // Implement proof of knowledge of committed values in a vector commitment for `SignatureGroup`
@@ -338,7 +338,7 @@ mod tests {
 
     #[test]
     fn test_PoK_sig() {
-        use signatures::ps::SignatureGroup;
+        use crate::signatures::ps::SignatureGroup;
 
         let count_msgs = 5;
         let params = Params::new("test".as_bytes());

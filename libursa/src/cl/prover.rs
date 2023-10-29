@@ -1903,9 +1903,7 @@ impl ProofBuilder {
 mod tests {
     use super::*;
     use crate::cl::issuer;
-    #[cfg(feature = "serde")]
-    use serde_json::{self, json};
-    use std::time::Instant;
+    use serde_json;
 
     #[cfg(feature = "serde")]
     #[test]

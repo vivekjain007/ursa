@@ -189,7 +189,7 @@ impl fmt::Display for R1CSError {
 
 impl From<R1CSError> for BulletproofError {
     fn from(err: R1CSError) -> BulletproofError {
-        let message = Fail::iter_causes(&err)
+        let message = <dyn Fail>::iter_causes(&err)
             .map(|e| e.to_string())
             .collect::<String>();
 

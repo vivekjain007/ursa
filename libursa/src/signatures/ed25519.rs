@@ -9,6 +9,7 @@ pub use ed25519_dalek::{
     EXPANDED_SECRET_KEY_LENGTH as PRIVATE_KEY_SIZE, PUBLIC_KEY_LENGTH as PUBLIC_KEY_SIZE,
     SIGNATURE_LENGTH as SIGNATURE_SIZE,
 };
+use crate::keys::{PrivateKey, PublicKey};
 use rand::rngs::OsRng;
 use rand::SeedableRng;
 use rand_chacha::ChaChaRng;
@@ -170,6 +171,7 @@ mod test {
     use super::super::{SignatureScheme, Signer};
     use super::*;
     use crate::keys::{KeyGenOption, PrivateKey, PublicKey};
+    use libsodium_ffi as ffi;
 
     const MESSAGE_1: &[u8] = b"This is a dummy message for use with tests";
     const SIGNATURE_1: &str = "451b5b8e8725321541954997781de51f4142e4a56bab68d24f6a6b92615de5eefb74134138315859a32c7cf5fe5a488bc545e2e08e5eedfd1fb10188d532d808";

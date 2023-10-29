@@ -4,7 +4,7 @@ use super::{ate_2_pairing, OtherGroupVec, SignatureGroup};
 use crate::amcl_wrapper::group_elem::GroupElementVector;
 use amcl_wrapper::field_elem::{FieldElement, FieldElementVector};
 use amcl_wrapper::group_elem::GroupElement;
-use signatures::ps::keys::Params;
+use crate::signatures::ps::keys::Params;
 
 /// Created by the signer when no blinded messages. Also the receiver of a blind signature can get
 /// this by unblinding the blind signature.

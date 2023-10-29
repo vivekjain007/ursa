@@ -2,12 +2,12 @@
 authors = ["The Hyperledger Ursa Contributors"]
 description = "The BBS+ signature scheme"
 documentation = "https://docs.rs/bbs"
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 name = "bbs"
 readme = "README.md"
 repository = "https://github.com/hyperledger/ursa"
-version = "0.4.2"
+version = "0.4.3"
 
 [badges]
 maintenance = { status = "actively-developed" }

@@ -193,8 +193,8 @@ mod tests {
     use super::*;
 
     use crate::ffi::cl::issuer::ursa_cl_credential_private_key_from_json;
-    use crate::utils::ctypes::*;
     use std::ptr;
+    use crate::utils::ctypes::*;
 
     #[test]
     fn ursa_get_current_error_works() {

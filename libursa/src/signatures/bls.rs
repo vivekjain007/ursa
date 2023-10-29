@@ -12,6 +12,7 @@ use amcl_wrapper::{
     group_elem_g2::G2,
     types_g2::GroupG2_SIZE,
 };
+use crate::keys::{KeyGenOption, PrivateKey as UrsaPrivateKey, PublicKey as UrsaPublicKey};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;

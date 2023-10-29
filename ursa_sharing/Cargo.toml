@@ -6,7 +6,7 @@ description = """
 A secret sharing library providing schemes like
 Shamir, Feldman, and Pedersen
 """
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 name = "ursa_sharing"
 readme = "README.md"
