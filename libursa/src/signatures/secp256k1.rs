@@ -1,6 +1,6 @@
 use super::*;
 use sha2::digest::generic_array::typenum::U32;
-use CryptoError;
+use crate::CryptoError;
 
 use rand::rngs::OsRng;
 

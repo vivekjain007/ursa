@@ -117,7 +117,7 @@ impl std::fmt::Display for BBSError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut first = true;
 
-        for cause in Fail::iter_chain(&self.inner) {
+        for cause in <dyn Fail>::iter_chain(&self.inner) {
             if first {
                 first = false;
                 writeln!(f, "Error: {}", cause)?;
@@ -206,7 +206,7 @@ impl From<PoKVCError> for BBSError {
     fn from(err: PoKVCError) -> Self {
         let message = format!(
             "PoKVCError: {}",
-            Fail::iter_causes(&err)
+            <dyn Fail>::iter_causes(&err)
                 .map(|e| e.to_string())
                 .collect::<String>()
         );

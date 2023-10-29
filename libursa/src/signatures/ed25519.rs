@@ -8,7 +8,7 @@ pub use ed25519_dalek::{
     EXPANDED_SECRET_KEY_LENGTH as PRIVATE_KEY_SIZE, PUBLIC_KEY_LENGTH as PUBLIC_KEY_SIZE,
     SIGNATURE_LENGTH as SIGNATURE_SIZE,
 };
-use keys::{PrivateKey, PublicKey};
+use crate::keys::{PrivateKey, PublicKey};
 use rand::rngs::OsRng;
 use rand::SeedableRng;
 use rand_chacha::ChaChaRng;
@@ -16,7 +16,7 @@ use sha2::Digest;
 use std::convert::TryFrom;
 use zeroize::Zeroize;
 
-use CryptoError;
+use crate::CryptoError;
 
 pub struct Ed25519Sha512;
 
@@ -169,7 +169,7 @@ mod test {
     use self::Ed25519Sha512;
     use super::super::{SignatureScheme, Signer};
     use super::*;
-    use keys::{KeyGenOption, PrivateKey, PublicKey};
+    use crate::keys::{KeyGenOption, PrivateKey, PublicKey};
     use libsodium_ffi as ffi;
 
     const MESSAGE_1: &[u8] = b"This is a dummy message for use with tests";

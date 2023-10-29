@@ -43,7 +43,7 @@ impl Share {
     /// The identifier is the first 4 bytes
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut o = self.identifier.to_be_bytes().to_vec();
-        o.append(&mut self.to_bytes());
+        o.append(&mut self.value.clone());
         o
     }
 
